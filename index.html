@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Software</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .company-info {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .company-info p {
+            margin: 5px 0;
+        }
+
+        .receipt-info {
+            margin-bottom: 10px;
+            text-align: right;
+        }
+
+        .receipt-info p {
+            margin: 5px 0;
+        }
+
+        #productForm {
+            margin-bottom: 20px;
+        }
+
+        #productForm label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #productForm input {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        #productForm button {
+            width: auto;
+        }
+        #gst {
+            margin-top: 20px;
+        }
+
+        #gst table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #gst th, #gst td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        #gst th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1 style="text-align: center;">Billing Software</h1>
+    </div>
+
+        <!-- Company Information -->
+        <div class="company-info">
+            <p><strong>Company Name:</strong> Your Company Name</p>
+            <p><strong>Address:</strong> Your Company Address</p>
+            <p><strong>Mobile Number:</strong> Your Company Mobile Number</p>
+        </div>
+
+        <!-- Receipt Information -->
+        <div class="receipt-info">
+            <p><strong>Date:</strong> <span id="currentDate"></span></p>
+            <p><strong>Time:</strong> <span id="currentTime"></span></p>
+        </div>
+
+        <!-- Product Form -->
+        <form id="productForm">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" required>
+
+            <label for="productPrice">Price (Rs):</label>
+            <input type="number" id="productPrice" step="0.01" required>
+
+            <label for="productQuantity">Quantity:</label>
+            <input type="number" id="productQuantity" min="1" value="1" required>
+
+            <button type="button" onclick="addProduct()">Add Product</button>
+        </form>
+
+        <!-- Product Details and Description -->
+        <div id="productDetails">
+            <h2>Product Details and Description</h2>
+            <table>
+                <tr>
+                    <th>Product Name</th>
+                    <td><span id="productNameDetail"></span></td>
+                </tr>
+                <tr>
+                    <th>Price (Rs)</th>
+                    <td><span id="productPriceDetail"></span></td>
+                </tr>
+                <tr>
+                    <th>Quantity</th>
+                    <td><span id="productQuantityDetail"></span></td>
+                </tr>
+                <tr>
+                    <th>Total (Rs)</th>
+                    <td><span id="totalAmountDetail"></span></td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td><span id="productDescriptionDetail"></span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- GST Section -->
+        <div id="gst">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount (Rs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Amount</td>
+                        <td><span id="totalAmount">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>CGST (9%)</td>
+                        <td><span id="cgstAmount">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>SGST (9%)</td>
+                        <td><span id="sgstAmount">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>Total Cost (Including GST)</td>
+                        <td><span id="totalCost">0.00</span></td>
+    
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const products = [];
+        let totalAmount = 0;
+        let gstAmount = 0;
+        let totalCost = 0;
+        
+        function addProduct() {
+    const productName = document.getElementById("productName").value;
+    const productPrice = parseFloat(document.getElementById("productPrice").value);
+    const productQuantity = parseInt(document.getElementById("productQuantity").value);
+
+    if (productName && !isNaN(productPrice) && productPrice > 0 && !isNaN(productQuantity) && productQuantity > 0) {
+        products.push({
+            name: productName,     
+            price: productPrice,
+            quantity: productQuantity,
+        });
+        updateCart();
+    } else {
+        alert("Please enter valid product details.");
+    }
+}
+function updateCart() {
+    const productNameDetail = document.getElementById("productNameDetail");
+    const productPriceDetail = document.getElementById("productPriceDetail");
+    const productQuantityDetail = document.getElementById("productQuantityDetail");
+    const totalAmountDetail = document.getElementById("totalAmountDetail");
+    const productDescriptionDetail = document.getElementById("productDescriptionDetail");
+
+    const currentDateElement = document.getElementById("currentDate");
+    const currentTimeElement = document.getElementById("currentTime");
+
+    // Display the latest product details
+    const latestProduct = products[products.length - 1];
+    productNameDetail.textContent = latestProduct.name;
+    productPriceDetail.textContent = latestProduct.price.toFixed(2);
+    productQuantityDetail.textContent = latestProduct.quantity;
+    totalAmountDetail.textContent = (latestProduct.price * latestProduct.quantity).toFixed(2);
+    productDescriptionDetail.textContent = latestProduct.description || ""; // Use an empty string if description is undefined
+
+    // Update total amount
+    totalAmount = products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+
+    // Update GST amount (18%)
+    gstAmount = totalAmount * 0.18;
+
+    // Update current date and time
+    const currentDate = new Date();
+    currentDateElement.textContent = currentDate.toLocaleDateString();
+    currentTimeElement.textContent = currentDate.toLocaleTimeString();
+
+    // Update total cost (including GST)
+    totalCost = totalAmount + gstAmount;
+
+    // Update the total cost display
+    document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+    document.getElementById("gstAmount").textContent = gstAmount.toFixed(2);
+    document.getElementById("totalCost").textContent = totalCost.toFixed(2);
+}
+
+    </script>
+</body>
+</html>
